@@ -1,20 +1,33 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"github.com/Tsaobill/code-agent/internal/agent"
-	"github.com/Tsaobill/code-agent/internal/api"
 	"os"
 	"strings"
+
+	"github.com/Tsaobill/code-agent/internal/agent"
+	"github.com/Tsaobill/code-agent/internal/api"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: ag <prompt>")
-		os.Exit(1)
+	var prompt string
+	info, _ := os.Stdin.Stat()
+	if (info.Mode() & os.ModeCharDevice) != os.ModeCharDevice {
+		// 有管道输入
+		scanner := bufio.NewScanner(os.Stdin)
+		var input strings.Builder
+		for scanner.Scan() {
+			input.WriteString(scanner.Text())
+		}
+		prompt = input.String()
+	} else {
+		if len(os.Args) < 2 {
+			fmt.Println("Usage: ag <prompt>")
+			os.Exit(1)
+		}
+		prompt = strings.Join(os.Args[1:], " ")
 	}
-
-	prompt := strings.Join(os.Args[1:], " ")
 
 	// 初始化API客户端
 	api_key := os.Getenv("ANTHROPIC_API_KEY")
