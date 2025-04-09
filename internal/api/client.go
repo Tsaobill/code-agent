@@ -30,6 +30,7 @@ func (c *ClaudeClient) SendPrompt(prompt string) (string, error) {
 			{"role": "user", "content": prompt},
 		},
 		"max_tokens": 4000,
+		"functions":nil,
 	}
 
 	jsonBody, _ := json.Marshal(requestBody)
