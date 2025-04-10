@@ -8,29 +8,38 @@ import (
 )
 
 type ClaudeClient struct {
-	apiKey     string
-	model      string
-	httpClient *http.Client
+	apiKey       string
+	model        string
+	systemPrompt string
+	httpClient   *http.Client
 }
 
 func NewClaudeClient(apiKey, model string) *ClaudeClient {
 	return &ClaudeClient{
-		apiKey:     apiKey,
-		model:      model,
-		httpClient: &http.Client{},
+		apiKey:       apiKey,
+		model:        model,
+		httpClient:   &http.Client{},
+		systemPrompt: defaultPrompt,
 	}
 }
 
+func (c *ClaudeClient) WithSysPrompt(prompt string) *ClaudeClient {
+	c.systemPrompt = prompt
+	return c
+}
+
+const defaultPrompt = "你是一个专业的编程助手,被用在通过命令行与用户交互的agentic coding tool中，请尽可能的帮助用户, 如果用户没有特别要求，你需要尽可能保持回答的简洁"
 const URL = `https://caobiao.uk/proxy/anthropic/v1/messages`
 
 func (c *ClaudeClient) SendPrompt(prompt string) (string, error) {
 	requestBody := map[string]interface{}{
 		"model": c.model,
 		"messages": []map[string]string{
+			{"role": "system", "content": c.systemPrompt},
 			{"role": "user", "content": prompt},
 		},
 		"max_tokens": 4000,
-		"functions":nil,
+		"functions":  nil,
 	}
 
 	jsonBody, _ := json.Marshal(requestBody)
